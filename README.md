@@ -8,7 +8,7 @@ It exposes REST APIs that allow other services — like the **API Gateway** and 
 
 ---
 
-## �� Overview
+## Overview
 
 The **User Service** is responsible for:
 - Creating and managing user accounts.
@@ -46,10 +46,7 @@ This service is one of five microservices in the **Distributed Notification Syst
 │  
 ▼  
 PostgreSQL + Redis  
-
-
 ---
-
 ## 🧰 Tech Stack
 
 | Component | Technology |
@@ -98,7 +95,7 @@ amqp://<username>:<password>@<host>:<port>/<vhost>
 | **PUT**  | `/api/users/:id/preferences` | Update user preferences           |
 | **GET**  | `/health`                    | Health check endpoint             |
 | **GET**  | `/ready`                     | Readiness check (DB, Redis)        
-```
+
 ### Example Response Format
 ```
 {
