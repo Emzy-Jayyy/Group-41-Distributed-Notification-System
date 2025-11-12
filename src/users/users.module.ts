@@ -9,9 +9,10 @@ import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Preference]),
-    RabbitMQModule, // 👈 now RabbitMQService is available here
+    RabbitMQModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService], 
 })
 export class UsersModule {}
