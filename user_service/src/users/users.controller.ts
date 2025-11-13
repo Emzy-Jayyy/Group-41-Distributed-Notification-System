@@ -5,7 +5,7 @@ import { UpdatePreferenceDto } from './dto/update-preference.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { Request } from 'express';
 
-@Controller('/users')
+@Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
