@@ -44,7 +44,7 @@ async function bootstrap() {
 
   await app.listen(port);
 
-  console.log(`🚀 ${process.env.SERVICE_NAME || 'User Service'} running on port ${port}`);
-  console.log(`📘 Swagger Docs: ${baseUrl}/docs`);
+  console.log(`${process.env.SERVICE_NAME || 'User Service'} running on port ${port}`);
+  console.log(` Swagger Docs: ${baseUrl}/docs`);
 }
 bootstrap();
