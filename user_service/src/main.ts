@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
 
   // Global prefix
-  app.setGlobalPrefix('api');
+ // app.setGlobalPrefix('api');
 
   // Validation
   app.useGlobalPipes(
@@ -23,7 +23,7 @@ async function bootstrap() {
   const env = process.env.NODE_ENV || 'development';
   const baseUrl =
     env === 'production'
-      ? process.env.API_BASE_URL || 'https://your-production-domain.com'
+      ? process.env.API_BASE_URL || 'https://distributed-notification-system-user-service-production.up.railway.app'
       : `http://localhost:${port}`;
 
   // Swagger configuration
