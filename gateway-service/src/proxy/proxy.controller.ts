@@ -1,8 +1,16 @@
-import { Controller, Req, Res, All } from '@nestjs/common';
+import { Controller, Req, Res, Put, Post, Get } from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import type { Request, Response } from 'express';
+import { CreateTemplateDto, CreateTemplateVersionDto } from 'src/dto/proxy.dto';
 
 interface ServiceMap {
   [key: string]: string;
@@ -20,6 +28,7 @@ export class ProxyController {
       user: this.config.get<string>('services.user_service_url') || '',
       template: this.config.get<string>('services.template_service_url') || '',
       push: this.config.get<string>('services.push_service_url') || '',
+      email: this.config.get<string>('services.email_service_url') || '',
     };
   }
 
@@ -71,55 +80,92 @@ export class ProxyController {
     }
   }
 
-  @All([
-    'register',
-    'login',
-    'auth/profile',
-    'users',
-    'users/*',
-    'user-health',
-    'user-ready',
-  ])
-  proxyUser(@Req() req: Request, @Res() res: Response) {
-    const rewrite = (url: string) => {
-      url = url.replace(/^\/register/, '/auth/register');
-      url = url.replace(/^\/login/, '/auth/login');
-      // url = url.replace(/^\/auth\/profile/, '/users/me');
-      url = url.replace(/^\/users\/me/, '/users/me');
-      url = url.replace(
-        /^\/users\/([^/]+)\/preferences/,
-        '/users/$1/preferences',
-      );
-      url = url.replace(/^\/users/, '/api/users');
-      url = url.replace(/^\/user-health/, '/health');
-      url = url.replace(/^\/user-ready/, '/ready');
-      return url;
-    };
-    return this.forward(this.services.user, req, res, rewrite);
+  // Health check for template service
+  @Get('template-health')
+  templateHealth(@Req() req: Request, @Res() res: Response) {
+    return this.forward(this.services.template, req, res, () => '/');
   }
 
-  @All([
-    'templates',
-    'templates/*',
-    'render',
-    'template-health',
-    'template-keepalive',
-  ])
-  proxyTemplate(@Req() req: Request, @Res() res: Response) {
-    const rewrite = (url: string) => {
-      if (url.startsWith('/templates'))
-        return url.replace(/^\/templates\/?(.*)$/, '/api/v1/templates/$1');
-      if (url.startsWith('/render')) return '/api/v1/render';
-      if (url.startsWith('/template-health')) return '/';
-      if (url.startsWith('/template-keepalive')) return '/internal/keepalive';
-      return url;
-    };
-    return this.forward(this.services.template, req, res, rewrite);
+  // Health check for email service
+  @Get('email-health')
+  emailHealth(@Req() req: Request, @Res() res: Response) {
+    return this.forward(this.services.email, req, res, () => '/');
   }
 
-  @All(['push', 'push/*'])
-  proxyPush(@Req() req: Request, @Res() res: Response) {
-    const rewrite = (url: string) => url.replace(/^\/push/, '/api/v1/push');
-    return this.forward(this.services.push, req, res, rewrite);
+  // Create template
+  @Post()
+  @ApiOperation({ summary: 'Create a new template' })
+  @ApiBody({ type: CreateTemplateDto, description: 'Template details' })
+  @ApiResponse({ status: 201, description: 'Template created successfully' })
+  createTemplate(@Req() req: Request, @Res() res: Response) {
+    return this.forward(
+      this.services.template,
+      req,
+      res,
+      () => '/api/v1/templates',
+    );
+  }
+
+  // Create template version
+  @Post('versions/:template_key')
+  @ApiOperation({ summary: 'Create a new template version' })
+  @ApiParam({
+    name: 'template_key',
+    required: true,
+    description: 'Template unique key',
+  })
+  @ApiBody({ type: CreateTemplateVersionDto, description: 'Version details' })
+  @ApiResponse({
+    status: 201,
+    description: 'Template version created successfully',
+  })
+  createTemplateVersion(@Req() req: Request, @Res() res: Response) {
+    return this.forward(
+      this.services.template,
+      req,
+      res,
+      () => `/api/v1/templates/versions/${req.params.template_key}`,
+    );
+  }
+
+  // Activate template
+  @Put('versions/:template_key')
+  @ApiOperation({ summary: 'Activate a template version' })
+  @ApiParam({
+    name: 'template_key',
+    required: true,
+    description: 'Template unique key',
+  })
+  @ApiQuery({
+    name: 'template_version_id',
+    required: true,
+    description: 'Template version unique id',
+  })
+  activateTemplate(@Req() req: Request, @Res() res: Response) {
+    return this.forward(
+      this.services.template,
+      req,
+      res,
+      () =>
+        `/api/v1/templates/versions/${req.params.template_key}?version=${req.query.template_version_id}`,
+    );
+  }
+
+  // Get template
+  @Get(':template_key')
+  @ApiOperation({ summary: 'Get template by key' })
+  @ApiParam({
+    name: 'template_key',
+    required: true,
+    description: 'Template unique key',
+  })
+  @ApiResponse({ status: 200, description: 'Template fetched successfully' })
+  getTemplate(@Req() req: Request, @Res() res: Response) {
+    return this.forward(
+      this.services.template,
+      req,
+      res,
+      () => `/api/v1/templates/${req.params.template_key}`,
+    );
   }
 }
