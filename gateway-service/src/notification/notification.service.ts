@@ -79,7 +79,7 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       recipient,
       template_key,
       template_vars,
-      title,
+      subject,
       body,
       data,
     } = payload;
@@ -98,7 +98,7 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       type,
       sender,
       recipient,
-      title,
+      subject,
       body: finalBody,
       data,
       created_at: new Date().toISOString(),

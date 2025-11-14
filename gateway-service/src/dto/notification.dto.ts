@@ -18,8 +18,8 @@ export class NotificationDto {
   @ApiProperty({ description: 'Recipient email or device token' })
   recipient: string;
 
-  @ApiProperty({ description: 'Title of the notification' })
-  title: string;
+  @ApiProperty({ description: 'Subject of the notification' })
+  subject: string;
 
   @ApiPropertyOptional({ description: 'Body of the notification (push notifications)' })
   body?: string;
@@ -47,8 +47,8 @@ export class MessageDto {
   @ApiProperty({ description: 'Recipient email or device token' })
   recipient: string;
 
-  @ApiProperty({ description: 'Notification title' })
-  title: string;
+  @ApiProperty({ description: 'Notification subject' })
+  subject: string;
 
   @ApiPropertyOptional({ description: 'Notification body' })
   body?: string;
