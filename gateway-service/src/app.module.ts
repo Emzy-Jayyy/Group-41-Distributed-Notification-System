@@ -22,14 +22,14 @@ import { ProxyModule } from './proxy/proxy.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        // const db = config.get('database');
+        const db = config.get('database');
         return {
-          dialect: "postgres", // db.dialect,
-          host: "postgres", // db.host,
-          port: 5432, // db.port,
-          username: "postgres", // db.username,
-          password: "postgres", // db.password,
-          database: "gateway_db", // db.name,
+          dialect: db.dialect,
+          host: db.host,
+          port: db.port,
+          username: db.username,
+          password: db.password,
+          database: db.name,
           autoLoadModels: true,
           synchronize: true,
           models: [StatusLog],

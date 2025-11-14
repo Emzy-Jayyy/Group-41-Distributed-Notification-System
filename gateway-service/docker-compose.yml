@@ -19,6 +19,7 @@ services:
       REDIS_HOST: redis-15806.c98.us-east-1-4.ec2.redns.redis-cloud.com
       EMAIL_QUEUE: email.queue
       PUSH_QUEUE: push.queue
+      STATUS_QUEUE: status.queue
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
