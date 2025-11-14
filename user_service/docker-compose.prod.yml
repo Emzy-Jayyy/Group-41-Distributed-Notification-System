@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-usersdb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [backend]
+
+  redis:
+    image: redis:alpine
+    networks: [backend]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    ports:
+      - "15672:15672"
+    networks: [backend]
+
+  user-service:
+    image: gift21990/user-service:latest
+    env_file:
+      - .env.production
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    ports:
+      - "3001:3001"
+    networks: [backend]
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
+    driver: bridge
