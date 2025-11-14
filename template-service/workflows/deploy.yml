@@ -1,0 +1,54 @@
+# .github/workflows/deploy.yml
+
+# Name of your new workflow
+name: Deploy Template Service to AWS EC2
+
+# --- 1. Trigger ---
+# This workflow runs on any push to the 'main' branch.
+# Change 'main' to 'dev' if you prefer to deploy from your dev branch.
+on:
+  push:
+    branches:
+      - main
+
+# --- 2. Jobs ---
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          # --- 3. Secrets (Set these in GitHub) ---
+          # Updated to match your repository's secret names
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          # --- 4. Deployment Script (Runs on your EC2) ---
+          # This script runs sequentially on your server.
+          # We use the exact paths from your systemd service file.
+          script: |
+            # Navigate to the project directory
+            cd /home/ubuntu/distributed-notification-system-template-service
+            
+            # Pull the latest changes from the main branch
+            echo "Pulling latest code..."
+            git pull origin main
+            
+            # Install/update dependencies using the venv's pip
+            echo "Installing dependencies..."
+            /home/ubuntu/distributed-notification-system-template-service/venv/bin/pip install -r requirements.txt
+            
+            # Create the .env file from the GitHub Secret
+            echo "Creating .env file..."
+            # This secret name (ENV_FILE) matches your list
+            echo "${{ secrets.ENV_FILE }}" > .env
+            
+            # Restart the systemd service to apply all changes
+            echo "Restarting application service..."
+            sudo systemctl restart template.service
+            
+            echo "Deployment successful!"
